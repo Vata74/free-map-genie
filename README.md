@@ -20,8 +20,8 @@ Tested manually on:
 
 Use the latest GitHub release assets:
 
-- `fmg-3.0.0-chrome.zip` for Chrome / Chromium browsers.
-- `fmg-3.0.0-firefox.xpi` for Firefox.
+- `fmg-x.y.z-chrome.zip` for Chrome / Chromium browsers.
+- `fmg-x.y.z-firefox.xpi` for Firefox.
 
 The Firefox XPI in the release is signed by Mozilla for the fork-specific add-on ID.
 

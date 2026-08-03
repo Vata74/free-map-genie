@@ -117,7 +117,12 @@ export default class BackgroundAdapter extends Adapter {
   }
 
   public async sendMessage(message: BackgroundMessage) {
-    const tab = await this.getTargetTab(message.tab);
+    // Provider responses must return to the tab that originated the request.
+    // Only user requests from Firefox extension pages need a MapGenie fallback.
+    const tab =
+      message.sender === "provider" && message.tab
+        ? message.tab
+        : await this.getTargetTab(message.tab);
     const key = this.getKeyForTab(tab);
 
     // Send to all global ports

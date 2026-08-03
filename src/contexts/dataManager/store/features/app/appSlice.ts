@@ -31,7 +31,7 @@ export const fetchGamesAsync = createAppAsyncThunk(
   "app/fetchGames",
   async (_, { extra: { services } }) => {
     try {
-      return services.mapgenie.fetchGames();
+      return await services.mapgenie.fetchGames();
     } catch (error) {
       toastr.error("Error", "Failed to fetch games from MapGenie.");
       logger.error("Failed to fetch games", error);
@@ -52,12 +52,18 @@ export const appSlice = createSlice({
       .addCase(injectIconFontAsync.fulfilled, (state) => {
         state.loadingCount -= 1;
       })
+      .addCase(injectIconFontAsync.rejected, (state) => {
+        state.loadingCount = Math.max(0, state.loadingCount - 1);
+      })
       .addCase(fetchGamesAsync.pending, (state) => {
         state.loadingCount += 1;
       })
       .addCase(fetchGamesAsync.fulfilled, (state, action) => {
         state.loadingCount -= 1;
         state.games = action.payload;
+      })
+      .addCase(fetchGamesAsync.rejected, (state) => {
+        state.loadingCount = Math.max(0, state.loadingCount - 1);
       });
   },
   selectors: {
