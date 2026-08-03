@@ -36,6 +36,50 @@ export default class BackgroundAdapter extends Adapter {
       .then((tabs) => tabs[0]);
   }
 
+  private hasConnectedPorts(tab?: Browser.tabs.Tab) {
+    const key = this.getKeyForTab(tab);
+    return !!key && (this.ports[key]?.size ?? 0) > 0;
+  }
+
+  private isWebTab(tab?: Browser.tabs.Tab) {
+    try {
+      const protocol = new URL(tab?.url ?? "").protocol;
+      return protocol === "http:" || protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
+
+  private hasConnectedWebPorts(tab?: Browser.tabs.Tab) {
+    return this.isWebTab(tab) && this.hasConnectedPorts(tab);
+  }
+
+  private async getFallbackTab(): Promise<Browser.tabs.Tab | undefined> {
+    if (!import.meta.env.FIREFOX) return;
+
+    const tabs = await browser.tabs.query({
+      url: ["https://mapgenie.io/*"],
+    });
+
+    return tabs.find((tab) => this.hasConnectedWebPorts(tab));
+  }
+
+  private async getTargetTab(tab?: Browser.tabs.Tab) {
+    if (tab && (!import.meta.env.FIREFOX || this.isWebTab(tab))) return tab;
+
+    const activeTab = await this.getActiveTab();
+    if (
+      this.hasConnectedPorts(activeTab) &&
+      (!import.meta.env.FIREFOX || this.isWebTab(activeTab))
+    ) {
+      return activeTab;
+    }
+
+    // Firefox has no offscreen document. Extension pages such as the Data
+    // Manager therefore need to reach a backend provider in a MapGenie tab.
+    return (await this.getFallbackTab()) ?? activeTab;
+  }
+
   private getKeyForTab(tab?: Browser.tabs.Tab) {
     return tab?.id?.toString() ?? "";
   }
@@ -73,7 +117,7 @@ export default class BackgroundAdapter extends Adapter {
   }
 
   public async sendMessage(message: BackgroundMessage) {
-    const tab = message.tab ?? (await this.getActiveTab());
+    const tab = await this.getTargetTab(message.tab);
     const key = this.getKeyForTab(tab);
 
     // Send to all global ports
