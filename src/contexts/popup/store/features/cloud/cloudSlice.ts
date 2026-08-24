@@ -67,7 +67,8 @@ export const cloudSignInWithGoogleAsync = createAppAsyncThunk<
   void
 >("cloud/signInWithGoogle", async (_, { extra: { services } }) => {
   try {
-    return await services.backend.cloudSignInWithGoogle();
+    const accessToken = await services.background.getGoogleAuthToken();
+    return await services.backend.cloudSignInWithGoogle(accessToken);
   } catch (e) {
     toastr.error("Error", "Failed to sign in with Google");
     logger.error("Failed to sign in with Google", e);

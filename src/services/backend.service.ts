@@ -46,8 +46,8 @@ class BackendService {
     return user;
   }
 
-  public async cloudSignInWithGoogle() {
-    const user = await this.cloudSync.signInWithGoogle();
+  public async cloudSignInWithGoogle(accessToken: string) {
+    const user = await this.cloudSync.signInWithGoogle(accessToken);
     await this.pushAllLocalDataToCloud();
     return user;
   }

@@ -88,17 +88,15 @@ export async function signIn(
   return toCloudUser(credential.user);
 }
 
-// Uses chrome.identity.getAuthToken, which relies on the extension's OAuth2
-// client_id/scopes declared in the manifest (see wxt.config.ts) and on the
-// extension having a stable, pinned ID (also set there). Only available on
-// Chrome; there's no browser.identity.getAuthToken equivalent on Firefox.
-export async function signInWithGoogle(): Promise<CloudUser> {
-  const result = await browser.identity.getAuthToken({ interactive: true });
-  if (!result.token) {
-    throw new Error("Google sign-in was cancelled or denied.");
-  }
-
-  return linkOrSignIn(GoogleAuthProvider.credential(null, result.token));
+// Takes the Google OAuth access token as a param rather than fetching it
+// itself with chrome.identity.getAuthToken(): that API only exists in
+// privileged extension pages (background, popup), not in this content
+// script running inside the offscreen document's iframe, even though the
+// iframe lives inside the extension's own offscreen.html. See
+// BackgroundService.getGoogleAuthToken() for where the token actually
+// comes from.
+export async function signInWithGoogle(accessToken: string): Promise<CloudUser> {
+  return linkOrSignIn(GoogleAuthProvider.credential(null, accessToken));
 }
 
 // Signs out of the current (real) account and immediately starts a fresh

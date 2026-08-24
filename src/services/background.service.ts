@@ -40,6 +40,18 @@ class BackgroundService {
   public async closeDataManager() {
     await this.windowManager.close(browser.runtime.getURL("dataManager.html"));
   }
+
+  // chrome.identity is only available in privileged extension pages
+  // (background, popup) — not in the content script running inside the
+  // offscreen document's iframe, where the rest of cloud sign-in actually
+  // happens. So the token is fetched here and handed to backend.cloudSignInWithGoogle.
+  public async getGoogleAuthToken(): Promise<string> {
+    const result = await browser.identity.getAuthToken({ interactive: true });
+    if (!result.token) {
+      throw new Error("Google sign-in was cancelled or denied.");
+    }
+    return result.token;
+  }
 }
 
 const backgroundService = createService({

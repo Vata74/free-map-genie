@@ -64,8 +64,8 @@ export class CloudSync {
     return user;
   }
 
-  public async signInWithGoogle(): Promise<CloudUser> {
-    const user = await firebaseSignInWithGoogle();
+  public async signInWithGoogle(accessToken: string): Promise<CloudUser> {
+    const user = await firebaseSignInWithGoogle(accessToken);
     this.user = user;
     this.pulledKeys.clear();
     return user;
