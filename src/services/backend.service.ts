@@ -52,19 +52,25 @@ class BackendService {
     return user;
   }
 
-  // Right after linking/signing into a real account, push everything this
-  // profile already has locally, for every game, instead of waiting for the
-  // next edit. Otherwise data you already had before linking would just sit
-  // unsynced until you happened to mark something new.
+  // Right after linking/signing into a real account, push everything
+  // already stored locally, for every profile and every game, instead of
+  // waiting for the next edit. Otherwise data you already had before
+  // linking would just sit unsynced until you happened to mark something
+  // new. Each local profile (the real MapGenie account, plus any local
+  // Guest profiles) gets its own branch in the cloud, so this never mixes
+  // one profile's data into another's.
   private async pushAllLocalDataToCloud() {
-    const profile = await this.database.profiles.getActive();
-    if (!profile) return;
+    const profiles = await this.database.profiles.get();
 
-    const games = await this.database.export(profile.id);
     await Promise.all(
-      Object.keys(games).map((gameId) =>
-        this.cloudSync.pushNow(new Key(Number(gameId), profile.id))
-      )
+      profiles.map(async (profile) => {
+        const games = await this.database.export(profile.id);
+        await Promise.all(
+          Object.keys(games).map((gameId) =>
+            this.cloudSync.pushNow(new Key(Number(gameId), profile.id))
+          )
+        );
+      })
     );
   }
 
@@ -131,7 +137,12 @@ class BackendService {
       throw new Error("No active user profile found");
     }
 
-    return this.database.import(user.id, games);
+    await this.database.import(user.id, games);
+    await Promise.all(
+      Object.keys(games).map((gameId) =>
+        this.cloudSync.pushNow(new Key(Number(gameId), user.id))
+      )
+    );
   }
 
   public async export(userId: number, gameId?: number) {

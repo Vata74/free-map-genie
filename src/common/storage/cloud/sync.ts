@@ -83,10 +83,25 @@ export class CloudSync {
     return app ? getFirestore(app) : null;
   }
 
+  // key.userId is the local FMG profile id (positive = the real MapGenie
+  // account id, stable across every device logged into that account;
+  // negative = a local "Guest N" profile, only meaningful on this device).
+  // Scoping the cloud doc by profile as well as game means switching
+  // between local profiles never overwrites another profile's cloud data,
+  // and a real MapGenie-linked profile naturally lines up across devices
+  // without any extra bookkeeping.
   private docRef(key: Key) {
     const db = this.firestore();
     if (!db || !this.user) return null;
-    return doc(db, "users", this.user.uid, "games", String(key.gameId));
+    return doc(
+      db,
+      "users",
+      this.user.uid,
+      "profiles",
+      String(key.userId),
+      "games",
+      String(key.gameId)
+    );
   }
 
   private isEmpty(data: UserData): boolean {

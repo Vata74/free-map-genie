@@ -51,9 +51,7 @@ export const Cloud = ({}: Cloud.Props) => {
   if (!configured && !loading) {
     return (
       <div className={style.cloud}>
-        <p className={style.hint}>
-          El guardado en la nube no está configurado en este build.
-        </p>
+        <p className={style.hint}>Cloud sync is not configured in this build.</p>
       </div>
     );
   }
@@ -74,10 +72,8 @@ export const Cloud = ({}: Cloud.Props) => {
         ) : (
           <>
             <div className={style.status}>
-              <FontIcon icon="upload" className={style.icon} />
-              <span className={style.email}>
-                Backup en la nube activo (sin vincular)
-              </span>
+              <FontIcon icon="cloud" className={style.icon} />
+              <span className={style.email}>Cloud backup active (not linked)</span>
             </div>
             <div className={style.form}>
               <input
@@ -89,7 +85,7 @@ export const Cloud = ({}: Cloud.Props) => {
               />
               <input
                 type="password"
-                placeholder="Contraseña"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
@@ -99,13 +95,13 @@ export const Cloud = ({}: Cloud.Props) => {
                   onClick={onSignIn}
                   disabled={submitting || !email || !password}
                 >
-                  Iniciar sesión
+                  Sign in
                 </Button>
                 <Button
                   onClick={onSignUp}
                   disabled={submitting || !email || !password}
                 >
-                  Crear cuenta
+                  Create account
                 </Button>
               </div>
               <Button
@@ -113,12 +109,12 @@ export const Cloud = ({}: Cloud.Props) => {
                 onClick={onSignInWithGoogle}
                 disabled={submitting}
               >
-                Continuar con Google
+                Continue with Google
               </Button>
               <p className={style.hint}>
-                Ya se está guardando en la nube automáticamente en este
-                dispositivo. Vinculá una cuenta (Google o email) solo si
-                querés acceder a tus datos desde otro dispositivo.
+                Your data is already backed up to the cloud automatically on
+                this device. Link a Google or email account only if you want
+                to access it from another device too.
               </p>
             </div>
           </>

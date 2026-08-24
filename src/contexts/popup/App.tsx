@@ -52,7 +52,7 @@ function App() {
             <TabView name="data" icon="database">
               <Data />
             </TabView>
-            <TabView name="cloud" icon="upload">
+            <TabView name="cloud" icon="cloud">
               <Cloud />
             </TabView>
           </TabsContainer>

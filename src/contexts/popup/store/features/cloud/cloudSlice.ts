@@ -43,7 +43,7 @@ export const cloudSignUpAsync = createAppAsyncThunk<
   try {
     return await services.backend.cloudSignUp(email, password);
   } catch (e) {
-    toastr.error("Error", "No se pudo crear la cuenta");
+    toastr.error("Error", "Failed to create account");
     logger.error("Failed to sign up", e);
     return undefined;
   }
@@ -56,7 +56,7 @@ export const cloudSignInAsync = createAppAsyncThunk<
   try {
     return await services.backend.cloudSignIn(email, password);
   } catch (e) {
-    toastr.error("Error", "No se pudo iniciar sesión");
+    toastr.error("Error", "Failed to sign in");
     logger.error("Failed to sign in", e);
     return undefined;
   }
@@ -69,7 +69,7 @@ export const cloudSignInWithGoogleAsync = createAppAsyncThunk<
   try {
     return await services.backend.cloudSignInWithGoogle();
   } catch (e) {
-    toastr.error("Error", "No se pudo iniciar sesión con Google");
+    toastr.error("Error", "Failed to sign in with Google");
     logger.error("Failed to sign in with Google", e);
     return undefined;
   }
@@ -82,7 +82,7 @@ export const cloudSignOutAsync = createAppAsyncThunk<
   try {
     return (await services.backend.cloudSignOut()) ?? undefined;
   } catch (e) {
-    toastr.error("Error", "No se pudo cerrar sesión");
+    toastr.error("Error", "Failed to sign out");
     logger.error("Failed to sign out", e);
     return undefined;
   }
