@@ -3,8 +3,8 @@
   "description": "Enhance mapgenie.io features.",
   "private": true,
   "version": "3.0.10",
-  "author": "V1P3R",
-  "homepage": "https://github.com/V1P3R-FMG/free-map-genie",
+  "author": "Vata74",
+  "homepage": "https://github.com/Vata74/free-map-genie-cloud",
   "type": "module",
   "scripts": {
     "dev": "wxt",
