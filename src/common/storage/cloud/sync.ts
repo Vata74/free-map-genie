@@ -11,6 +11,7 @@ import { getFirebaseApp } from "@/common/firebase/app";
 import {
   signIn as firebaseSignIn,
   signUp as firebaseSignUp,
+  signInWithGoogle as firebaseSignInWithGoogle,
   signOutUser as firebaseSignOutUser,
   waitForAuthReady,
   type CloudUser,
@@ -58,6 +59,13 @@ export class CloudSync {
 
   public async signIn(email: string, password: string): Promise<CloudUser> {
     const user = await firebaseSignIn(email, password);
+    this.user = user;
+    this.pulledKeys.clear();
+    return user;
+  }
+
+  public async signInWithGoogle(): Promise<CloudUser> {
+    const user = await firebaseSignInWithGoogle();
     this.user = user;
     this.pulledKeys.clear();
     return user;

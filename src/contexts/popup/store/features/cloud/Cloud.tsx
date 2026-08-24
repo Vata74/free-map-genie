@@ -3,6 +3,7 @@ import {
   fetchCloudStatusAsync,
   cloudSignInAsync,
   cloudSignUpAsync,
+  cloudSignInWithGoogleAsync,
   cloudSignOutAsync,
   selectCloudConfigured,
   selectCloudLoading,
@@ -34,6 +35,12 @@ export const Cloud = ({}: Cloud.Props) => {
   const onSignUp = async () => {
     setSubmitting(true);
     await dispatch(cloudSignUpAsync({ email, password }));
+    setSubmitting(false);
+  };
+
+  const onSignInWithGoogle = async () => {
+    setSubmitting(true);
+    await dispatch(cloudSignInWithGoogleAsync());
     setSubmitting(false);
   };
 
@@ -92,6 +99,13 @@ export const Cloud = ({}: Cloud.Props) => {
                 Crear cuenta
               </Button>
             </div>
+            <Button
+              className={style.btn}
+              onClick={onSignInWithGoogle}
+              disabled={submitting}
+            >
+              Continuar con Google
+            </Button>
             <p className={style.hint}>
               Tus ubicaciones marcadas, categorías y notas se sincronizan a tu
               cuenta y se pueden recuperar en cualquier dispositivo.

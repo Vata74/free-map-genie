@@ -64,6 +64,9 @@ export default defineConfig({
     "import.meta.env.FIREBASE_APP_ID": JSON.stringify(
       process.env.FIREBASE_APP_ID ?? ""
     ),
+    "import.meta.env.GOOGLE_OAUTH_CLIENT_ID": JSON.stringify(
+      process.env.GOOGLE_OAUTH_CLIENT_ID ?? ""
+    ),
   },
   fantasticon: {
     name: "fmg-icons",
@@ -77,6 +80,15 @@ export default defineConfig({
     inputDir: "icons",
   },
   manifest: ({ browser, manifestVersion }) => ({
+    // Pins the extension ID across rebuilds (chrome computes the ID from
+    // this public key). Needed so the "Chrome App" OAuth client used by
+    // chrome.identity.getAuthToken (Google sign-in) keeps matching this
+    // extension. The matching private key lives outside the repo in
+    // .secrets/, see README for setup.
+    key:
+      browser === "chrome"
+        ? "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvjBoQQDahWd1OucUAy3y8FlYnpkZZqzlJXkuTEhqePWB6glYoBUSCH6PphjRL6yLqoQYOWAzQALRlXmWMoXv08D0v9l7oV1tlxm+r/jgUMr+thUiKzl70MHnXpmGo6ItQBObs6BMDxLNqsrQ+AzcdTtaMINWFWpFL/WVNlGkoO6lMVNnQmOPl+BSO7IarW6rOmTX6NYq33xWd5DVpdWwB/HtaPF2AgoiK0tIs10RztKotV3Hfs/MxedN4UbsUbk0uZzSBlSW73fzsxpgsFuZUA7QoeLZ5zBj0nPgcaQCxhbjer2DVUnP1iiLGlV799QXWocXD2H+Hq/OqOLQxsSWoQIDAQAB"
+        : undefined,
     host_permissions: [
       "*://mapgenie.io/*",
       "*://www.mapgenie.io/*",
@@ -98,10 +110,17 @@ export default defineConfig({
     ],
     permissions:
       browser === "chrome"
-        ? ["declarativeNetRequest", "offscreen", "storage"]
+        ? ["declarativeNetRequest", "offscreen", "storage", "identity"]
         : manifestVersion === 2
           ? ["webRequest", "webRequestBlocking", "storage"]
           : ["declarativeNetRequest", "storage"],
+    oauth2:
+      browser === "chrome" && process.env.GOOGLE_OAUTH_CLIENT_ID
+        ? {
+            client_id: process.env.GOOGLE_OAUTH_CLIENT_ID,
+            scopes: ["openid", "email", "profile"],
+          }
+        : undefined,
     background_page: "background/page.html",
     browser_specific_settings:
       browser === "chrome"

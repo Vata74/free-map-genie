@@ -2,6 +2,8 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithCredential,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type Auth,
@@ -46,6 +48,21 @@ export async function signIn(
     password
   );
   return toCloudUser(credential.user);
+}
+
+// Uses chrome.identity.getAuthToken, which relies on the extension's OAuth2
+// client_id/scopes declared in the manifest (see wxt.config.ts) and on the
+// extension having a stable, pinned ID (also set there). Only available on
+// Chrome; there's no browser.identity.getAuthToken equivalent on Firefox.
+export async function signInWithGoogle(): Promise<CloudUser> {
+  const result = await browser.identity.getAuthToken({ interactive: true });
+  if (!result.token) {
+    throw new Error("Google sign-in was cancelled or denied.");
+  }
+
+  const credential = GoogleAuthProvider.credential(null, result.token);
+  const userCredential = await signInWithCredential(requireAuth(), credential);
+  return toCloudUser(userCredential.user);
 }
 
 export async function signOutUser(): Promise<void> {

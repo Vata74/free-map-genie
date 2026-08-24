@@ -41,6 +41,10 @@ class BackendService {
     return this.cloudSync.signIn(email, password);
   }
 
+  public cloudSignInWithGoogle() {
+    return this.cloudSync.signInWithGoogle();
+  }
+
   public cloudSignOut() {
     return this.cloudSync.signOut();
   }

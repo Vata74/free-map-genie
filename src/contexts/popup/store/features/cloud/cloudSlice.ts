@@ -61,6 +61,19 @@ export const cloudSignInAsync = createAppAsyncThunk<
   }
 });
 
+export const cloudSignInWithGoogleAsync = createAppAsyncThunk<
+  CloudUser | undefined,
+  void
+>("cloud/signInWithGoogle", async (_, { extra: { services } }) => {
+  try {
+    return await services.backend.cloudSignInWithGoogle();
+  } catch (e) {
+    toastr.error("Error", "No se pudo iniciar sesión con Google");
+    logger.error("Failed to sign in with Google", e);
+    return undefined;
+  }
+});
+
 export const cloudSignOutAsync = createAppAsyncThunk<void, void>(
   "cloud/signOut",
   async (_, { extra: { services } }) => {
@@ -91,6 +104,9 @@ export const cloudSlice = createSlice({
         if (action.payload) state.user = action.payload;
       })
       .addCase(cloudSignInAsync.fulfilled, (state, action) => {
+        if (action.payload) state.user = action.payload;
+      })
+      .addCase(cloudSignInWithGoogleAsync.fulfilled, (state, action) => {
         if (action.payload) state.user = action.payload;
       })
       .addCase(cloudSignOutAsync.fulfilled, (state) => {
