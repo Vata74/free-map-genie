@@ -71,10 +71,11 @@ export class CloudSync {
     return user;
   }
 
-  public async signOut(): Promise<void> {
-    await firebaseSignOutUser();
-    this.user = null;
+  public async signOut(): Promise<CloudUser | null> {
+    const user = await firebaseSignOutUser();
+    this.user = user;
     this.pulledKeys.clear();
+    return user;
   }
 
   private firestore(): Firestore | null {
@@ -129,9 +130,11 @@ export class CloudSync {
   }
 
   // Debounced so a burst of local writes (marking several locations in a
-  // row) collapses into one push instead of one write per action.
+  // row) collapses into one push instead of one write per action. Doesn't
+  // gate on this.user directly since the initial anonymous sign-in may
+  // still be in flight; push() awaits `ready` before checking.
   public schedulePush(key: Key): void {
-    if (!this.user) return;
+    if (!this.isConfigured()) return;
 
     const cacheKey = key.toString();
     const existing = this.pushTimers.get(cacheKey);
@@ -148,6 +151,7 @@ export class CloudSync {
   }
 
   private async push(key: Key): Promise<void> {
+    await this.ready;
     const ref = this.docRef(key);
     if (!ref) return;
 

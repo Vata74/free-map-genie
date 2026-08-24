@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 export interface CloudUser {
   uid: string;
   email: string | null;
+  isAnonymous: boolean;
 }
 
 export interface CloudState {
@@ -74,17 +75,18 @@ export const cloudSignInWithGoogleAsync = createAppAsyncThunk<
   }
 });
 
-export const cloudSignOutAsync = createAppAsyncThunk<void, void>(
-  "cloud/signOut",
-  async (_, { extra: { services } }) => {
-    try {
-      await services.backend.cloudSignOut();
-    } catch (e) {
-      toastr.error("Error", "No se pudo cerrar sesión");
-      logger.error("Failed to sign out", e);
-    }
+export const cloudSignOutAsync = createAppAsyncThunk<
+  CloudUser | undefined,
+  void
+>("cloud/signOut", async (_, { extra: { services } }) => {
+  try {
+    return (await services.backend.cloudSignOut()) ?? undefined;
+  } catch (e) {
+    toastr.error("Error", "No se pudo cerrar sesión");
+    logger.error("Failed to sign out", e);
+    return undefined;
   }
-);
+});
 
 export const cloudSlice = createSlice({
   name: "cloud",
@@ -109,8 +111,8 @@ export const cloudSlice = createSlice({
       .addCase(cloudSignInWithGoogleAsync.fulfilled, (state, action) => {
         if (action.payload) state.user = action.payload;
       })
-      .addCase(cloudSignOutAsync.fulfilled, (state) => {
-        state.user = null;
+      .addCase(cloudSignOutAsync.fulfilled, (state, action) => {
+        state.user = action.payload ?? null;
       });
   },
   selectors: {
