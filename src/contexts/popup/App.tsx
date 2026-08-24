@@ -16,6 +16,7 @@ import { Bookmarks } from "./store/features/bookmarks/Bookmarks";
 import { Info } from "./store/features/info/Info";
 import { Profiles } from "./store/features/profiles/Profiles";
 import { Data } from "./store/features/data/Data";
+import { Cloud } from "./store/features/cloud/Cloud";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -50,6 +51,9 @@ function App() {
             </TabView>
             <TabView name="data" icon="database">
               <Data />
+            </TabView>
+            <TabView name="cloud" icon="upload">
+              <Cloud />
             </TabView>
           </TabsContainer>
           <Footer />

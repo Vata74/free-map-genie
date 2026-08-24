@@ -1,0 +1,73 @@
+.cloud {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem;
+    background-color: var(--background-darker);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    .icon {
+      font-size: 1.25rem;
+    }
+
+    .email {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    input {
+      padding: 0.5rem 0.75rem;
+      background-color: var(--background-darker);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: inherit;
+      font: inherit;
+
+      &:focus {
+        outline: 1px solid var(--item-hover);
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+
+  .btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 0.5rem 1rem;
+
+    .icon {
+      font-size: 1rem;
+    }
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    text-align: center;
+  }
+}

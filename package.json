@@ -28,6 +28,7 @@
     "axios-cache-interceptor": "^1.11.2",
     "clsx": "^2.1.1",
     "dexie": "^4.2.1",
+    "firebase": "^12.18.0",
     "is-mobile": "^5.0.0",
     "jquery": "^3.7.1",
     "lazy-get-decorator": "^3.0.0",

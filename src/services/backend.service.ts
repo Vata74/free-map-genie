@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import { DexieDatabase } from "@/common/storage/databases";
 import { Migrator } from "@/common/storage/migrator";
+import { CloudSync } from "@/common/storage/cloud/sync";
 import { createService, type ProxiedObject } from "@/common/messaging";
 import { getAuthToken, setAuthToken } from "@/common/mapgenie";
 
@@ -8,12 +9,41 @@ import mapgenieService from "./mapgenie.service";
 
 import type { Key, UserData } from "@/common/storage";
 import type { Bookmark } from "@/common/bookmark";
+import type { CloudUser } from "@/common/firebase/auth";
 
 class BackendService {
   private readonly migrator = new Migrator();
   private readonly database = new DexieDatabase();
 
   private readonly mapgenie = mapgenieService.use();
+
+  // Mirrors the Dexie-backed data to Firestore, keyed by game, so it
+  // survives the local browser storage being cleared. See
+  // src/common/storage/cloud/sync.ts for the sync strategy.
+  private readonly cloudSync = new CloudSync(
+    (key) => this.database.getData(key),
+    (key, data) => this.database.setData(key, data)
+  );
+
+  public cloudIsConfigured() {
+    return this.cloudSync.isConfigured();
+  }
+
+  public cloudGetUser(): Promise<CloudUser | null> {
+    return this.cloudSync.getUser();
+  }
+
+  public cloudSignUp(email: string, password: string) {
+    return this.cloudSync.signUp(email, password);
+  }
+
+  public cloudSignIn(email: string, password: string) {
+    return this.cloudSync.signIn(email, password);
+  }
+
+  public cloudSignOut() {
+    return this.cloudSync.signOut();
+  }
 
   public getAuthToken() {
     return getAuthToken();
@@ -65,6 +95,7 @@ class BackendService {
 
     const user = await this.mapgenie.fetchUser(key.gameId);
     await this.database.importMapgenie(key, user);
+    this.cloudSync.schedulePush(key);
   }
 
   public async import(games: Record<number, UserData>) {
@@ -91,29 +122,35 @@ class BackendService {
   }
 
   public async getData(key: Key) {
+    await this.cloudSync.pullIfNeeded(key);
     return this.database.getData(key);
   }
 
   public async removeData(key: Key) {
     await this.database.removeData(key);
+    this.cloudSync.schedulePush(key);
   }
 
   public async markLocationFound(key: Key, locationId: number, found: boolean) {
     await this.database.locations.setFound(key, locationId, found);
+    this.cloudSync.schedulePush(key);
   }
 
   public async deleteLocations(key: Key, locationIds: number[]) {
     await this.database.locations.deleteIds(key, locationIds);
+    this.cloudSync.schedulePush(key);
   }
 
   public async trackCategory(key: Key, categoryId: number, track: boolean) {
     await this.database.categories.setTracked(key, categoryId, track);
+    this.cloudSync.schedulePush(key);
   }
 
   public async addNote(key: Key, note: Omit<MG.Note, "id" | "created_at">) {
     const created_at = new Date().toISOString();
     const id = await this.database.notes.add(key, { ...note, created_at });
     const user_id = key.userId;
+    this.cloudSync.schedulePush(key);
     return { ...note, user_id, created_at, id };
   }
 
@@ -140,6 +177,7 @@ class BackendService {
 
         await this.reorderPresets(key, [...ordering, id]);
 
+        this.cloudSync.schedulePush(key);
         return { ...preset, order, id };
       }
     );
@@ -152,6 +190,7 @@ class BackendService {
 
   public async reorderPresets(key: Key, ordering: number[]) {
     await this.database.presetsOrdering.set(key, ordering);
+    this.cloudSync.schedulePush(key);
   }
 
   public async getBookmarks() {
