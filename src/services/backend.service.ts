@@ -37,18 +37,10 @@ class BackendService {
   }
 
   public async storageRequestPersist() {
-    const permission = await navigator.permissions.query({
-      name: "persistent-storage",
-    });
+    const alreadyPersisted = await navigator.storage.persisted();
+    if (alreadyPersisted) return true;
 
-    if (permission.state === "granted") {
-      return navigator.storage.persist();
-    } else {
-      logger.debug("Persistent storage permission not granted.", {
-        state: permission.state,
-      });
-      return false;
-    }
+    return navigator.storage.persist();
   }
 
   public async migrate(domain: string, key: Key) {
