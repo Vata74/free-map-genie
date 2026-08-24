@@ -127,7 +127,7 @@ export default defineConfig({
         ? undefined
         : {
             gecko: {
-              id: "free-map-genie-nr2bj@nr2bj.github.io",
+              id: "free-map-genie-cloud@vata74.github.io",
               data_collection_permissions: {
                 required: ["none"],
               },
