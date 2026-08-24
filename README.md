@@ -6,9 +6,9 @@ This is a fork of [NR2BJ/free-map-genie](https://github.com/NR2BJ/free-map-genie
 
 ## Screenshots
 
-| Cloud backup, no login needed | Linked to an account | Import / Export |
-| --- | --- | --- |
-| ![Cloud tab, backup active but not linked to any account](docs/screenshots/popup-cloud-anonymous.png) | ![Cloud tab, linked to an email account](docs/screenshots/popup-cloud-linked.png) | ![Data tab with import/export/clear actions](docs/screenshots/popup-data.png) |
+| Cloud backup, no login needed | Linked to an account |
+| --- | --- |
+| ![Cloud tab, backup active but not linked to any account](docs/screenshots/popup-cloud-anonymous.png) | ![Cloud tab, linked to an email account](docs/screenshots/popup-cloud-linked.png) |
 
 ## Install
 
@@ -29,7 +29,7 @@ Everything NR2BJ's fork already does (MapGenie v3 compatibility, Pro unlock, Chr
 - **Zero-friction by default.** The extension signs in anonymously the moment it loads — there's no login screen to get through before backup starts working on this device.
 - **Optional account linking.** Sign in with Google or an email/password account to sync the same data across multiple computers, or on Android through a browser that supports extensions (see [Mobile](#mobile-android)).
 - **Per-profile sync.** If you use more than one local profile (a MapGenie account plus local Guest profiles), each one is synced separately — switching profiles never overwrites another profile's cloud data.
-- **Works with the existing Import/Export.** Importing a save file, or importing from your MapGenie account, pushes the result to the cloud the same way marking a location does.
+- **Works with the existing Import/Export.** Importing a save file from the Data tab, or importing straight from your MapGenie account, now also pushes the result to Firebase — not just local storage — the same way marking a location does.
 
 Cloud sync is entirely optional: without a Firebase project configured, the extension behaves exactly like NR2BJ's fork, with local-only storage.
 
