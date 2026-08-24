@@ -12,8 +12,14 @@ export class LoginPage {
   private async gotoLoginPage(url: string) {
     await this.page.goto(url);
 
-    const visible = await this.privacyAcceptButton.isVisible();
-    if (visible) {
+    // MapGenie now uses a OneTrust cookie consent banner, whose dark
+    // backdrop overlay intercepts clicks on the rest of the page until
+    // dismissed. Try that first, falling back to the older "I Accept"
+    // button this test used to look for.
+    const oneTrustAccept = this.page.locator("#onetrust-accept-btn-handler");
+    if (await oneTrustAccept.isVisible().catch(() => false)) {
+      await oneTrustAccept.click();
+    } else if (await this.privacyAcceptButton.isVisible().catch(() => false)) {
       await this.privacyAcceptButton.click();
     }
 
