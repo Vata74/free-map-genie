@@ -114,13 +114,6 @@ export default defineConfig({
         : manifestVersion === 2
           ? ["webRequest", "webRequestBlocking", "storage"]
           : ["declarativeNetRequest", "storage"],
-    oauth2:
-      browser === "chrome" && process.env.GOOGLE_OAUTH_CLIENT_ID
-        ? {
-            client_id: process.env.GOOGLE_OAUTH_CLIENT_ID,
-            scopes: ["openid", "email", "profile"],
-          }
-        : undefined,
     background_page: "background/page.html",
     browser_specific_settings:
       browser === "chrome"

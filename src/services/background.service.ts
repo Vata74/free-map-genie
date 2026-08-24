@@ -45,12 +45,52 @@ class BackgroundService {
   // (background, popup) — not in the content script running inside the
   // offscreen document's iframe, where the rest of cloud sign-in actually
   // happens. So the token is fetched here and handed to backend.cloudSignInWithGoogle.
+  //
+  // Uses launchWebAuthFlow rather than getAuthToken: getAuthToken relies on
+  // Chrome's own signed-in-profile integration and isn't implemented on
+  // Edge ("This API is not supported on Microsoft Edge"). launchWebAuthFlow
+  // is the standard WebExtensions API and works the same on Chrome, Edge,
+  // and Firefox — it just opens a normal Google OAuth consent popup instead
+  // of using the browser's native account chooser.
+  //
+  // This needs a "Web application" OAuth client (not "Chrome Extension"),
+  // e.g. the one Firebase auto-creates when you enable Google sign-in
+  // (Firebase console > Authentication > Sign-in method > Google > Web SDK
+  // configuration), with browser.identity.getRedirectURL() added to its
+  // Authorized redirect URIs in Google Cloud Console.
   public async getGoogleAuthToken(): Promise<string> {
-    const result = await browser.identity.getAuthToken({ interactive: true });
-    if (!result.token) {
+    const clientId = import.meta.env.GOOGLE_OAUTH_CLIENT_ID;
+    if (!clientId) {
+      throw new Error("GOOGLE_OAUTH_CLIENT_ID is not configured");
+    }
+
+    const redirectUri = browser.identity.getRedirectURL();
+
+    const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+    authUrl.searchParams.set("client_id", clientId);
+    authUrl.searchParams.set("response_type", "token");
+    authUrl.searchParams.set("redirect_uri", redirectUri);
+    authUrl.searchParams.set("scope", "openid email profile");
+    authUrl.searchParams.set("prompt", "select_account");
+
+    const redirectedTo = await browser.identity.launchWebAuthFlow({
+      url: authUrl.toString(),
+      interactive: true,
+    });
+    if (!redirectedTo) {
       throw new Error("Google sign-in was cancelled or denied.");
     }
-    return result.token;
+
+    const accessToken = new URL(redirectedTo).hash
+      ? new URLSearchParams(new URL(redirectedTo).hash.slice(1)).get(
+          "access_token"
+        )
+      : null;
+    if (!accessToken) {
+      throw new Error("Google sign-in did not return an access token.");
+    }
+
+    return accessToken;
   }
 }
 
