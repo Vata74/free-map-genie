@@ -4,6 +4,23 @@ Browser extension that unlocks MapGenie Pro features for free, with an added clo
 
 This is a fork of [NR2BJ/free-map-genie](https://github.com/NR2BJ/free-map-genie), the actively maintained fork that keeps up with MapGenie's site changes. NR2BJ's fork is itself based on the original [V1P3R-FMG/free-map-genie](https://github.com/V1P3R-FMG/free-map-genie), created by [MrFusiion](https://github.com/MrFusiion). See [Credits](#credits).
 
+## Screenshots
+
+| Cloud backup, no login needed | Linked to an account | Import / Export |
+| --- | --- | --- |
+| ![Cloud tab, backup active but not linked to any account](docs/screenshots/popup-cloud-anonymous.png) | ![Cloud tab, linked to an email account](docs/screenshots/popup-cloud-linked.png) | ![Data tab with import/export/clear actions](docs/screenshots/popup-data.png) |
+
+## Install
+
+1. Go to [Releases](../../releases) and download the latest `fmg-x.y.z-chrome.zip` (Chrome/Edge/Brave/Kiwi) or `fmg-x.y.z-firefox.xpi` (Firefox)
+2. **Chrome/Edge/Brave:**
+   - Unzip the file somewhere permanent (don't delete the folder afterwards — the browser loads the extension from it)
+   - Go to `chrome://extensions` (or `edge://extensions`), enable **Developer mode** (top right)
+   - **Load unpacked** → select the unzipped folder
+3. **Firefox:** the `.xpi` isn't signed yet, so regular Firefox will only let you load it temporarily via `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on** (resets when you close Firefox). Use Chrome/Edge/Brave for a permanent install until this gets signed through Mozilla.
+4. **Android:** [Kiwi Browser](https://kiwibrowser.com) can load the same Chrome zip directly — see [Mobile](#mobile-android).
+5. Open any MapGenie map, click the extension icon, go to the **Cloud** tab — cloud backup is already on, no login required. Link a Google or email account later if you want it on more than one device (see [Setup](#setup-for-people-building-from-source) for the recommendation on why).
+
 ## What this adds on top of NR2BJ's fork
 
 Everything NR2BJ's fork already does (MapGenie v3 compatibility, Pro unlock, Chrome/Firefox builds), plus:

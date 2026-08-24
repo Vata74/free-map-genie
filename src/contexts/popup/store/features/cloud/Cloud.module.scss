@@ -8,6 +8,8 @@
     align-items: center;
     gap: 10px;
     padding: 0.75rem;
+    max-width: 100%;
+    overflow: hidden;
     background-color: var(--background-darker);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -18,10 +20,23 @@
 
     .email {
       flex: 1;
+      // A hard cap rather than relying on flex-shrink/min-width alone:
+      // this sits inside several nested flex containers (Loading, Tabs)
+      // that don't all set min-width: 0, so a long unbroken email can
+      // still force the whole popup wider without one. Ellipsis is fine
+      // either way, so an explicit cap is simpler than chasing every
+      // ancestor's flex sizing.
+      max-width: 220px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       font-size: 0.9rem;
+    }
+
+    button {
+      flex: 0 0 auto;
+      width: auto;
+      padding: 0.5rem 0.75rem;
     }
   }
 
