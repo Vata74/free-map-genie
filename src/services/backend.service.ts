@@ -7,7 +7,8 @@ import { getAuthToken, setAuthToken } from "@/common/mapgenie";
 
 import mapgenieService from "./mapgenie.service";
 
-import type { Key, UserData } from "@/common/storage";
+import { Key } from "@/common/storage";
+import type { UserData } from "@/common/storage";
 import type { Bookmark } from "@/common/bookmark";
 import type { CloudUser } from "@/common/firebase/auth";
 
@@ -33,16 +34,38 @@ class BackendService {
     return this.cloudSync.getUser();
   }
 
-  public cloudSignUp(email: string, password: string) {
-    return this.cloudSync.signUp(email, password);
+  public async cloudSignUp(email: string, password: string) {
+    const user = await this.cloudSync.signUp(email, password);
+    await this.pushAllLocalDataToCloud();
+    return user;
   }
 
-  public cloudSignIn(email: string, password: string) {
-    return this.cloudSync.signIn(email, password);
+  public async cloudSignIn(email: string, password: string) {
+    const user = await this.cloudSync.signIn(email, password);
+    await this.pushAllLocalDataToCloud();
+    return user;
   }
 
-  public cloudSignInWithGoogle() {
-    return this.cloudSync.signInWithGoogle();
+  public async cloudSignInWithGoogle() {
+    const user = await this.cloudSync.signInWithGoogle();
+    await this.pushAllLocalDataToCloud();
+    return user;
+  }
+
+  // Right after linking/signing into a real account, push everything this
+  // profile already has locally, for every game, instead of waiting for the
+  // next edit. Otherwise data you already had before linking would just sit
+  // unsynced until you happened to mark something new.
+  private async pushAllLocalDataToCloud() {
+    const profile = await this.database.profiles.getActive();
+    if (!profile) return;
+
+    const games = await this.database.export(profile.id);
+    await Promise.all(
+      Object.keys(games).map((gameId) =>
+        this.cloudSync.pushNow(new Key(Number(gameId), profile.id))
+      )
+    );
   }
 
   public cloudSignOut() {

@@ -129,6 +129,16 @@ export class CloudSync {
     }
   }
 
+  // Pushes immediately instead of debouncing, and marks the key as already
+  // pulled so a later getData() for it doesn't try to pull cloud data back
+  // over what we just pushed. Used right after linking/signing into a real
+  // account, so whatever's already on this device goes up right away
+  // instead of waiting for the next edit to that game.
+  public async pushNow(key: Key): Promise<void> {
+    this.pulledKeys.add(key.toString());
+    await this.push(key);
+  }
+
   // Debounced so a burst of local writes (marking several locations in a
   // row) collapses into one push instead of one write per action. Doesn't
   // gate on this.user directly since the initial anonymous sign-in may
