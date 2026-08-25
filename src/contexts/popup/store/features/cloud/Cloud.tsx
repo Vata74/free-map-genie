@@ -65,8 +65,8 @@ export const Cloud = ({}: Cloud.Props) => {
           <div className={style.status}>
             <FontIcon icon="user" className={style.icon} />
             <span className={style.email}>{user!.email}</span>
-            <Button type="cancel" onClick={onSignOut}>
-              <FontIcon icon="power" />
+            <Button className={style.signOutBtn} onClick={onSignOut}>
+              <FontIcon icon="logout" title="Sign out" />
             </Button>
           </div>
         ) : (
