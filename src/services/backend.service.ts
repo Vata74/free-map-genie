@@ -23,7 +23,9 @@ class BackendService {
   // src/common/storage/cloud/sync.ts for the sync strategy.
   private readonly cloudSync = new CloudSync(
     (key) => this.database.getData(key),
-    (key, data) => this.database.setData(key, data)
+    (key, data) => this.database.setData(key, data),
+    (key) => this.database.categoryFilters.get(key),
+    (key, filters) => this.database.categoryFilters.set(key, filters)
   );
 
   public cloudIsConfigured() {
@@ -190,6 +192,7 @@ class BackendService {
 
   public async setCategoryFilters(key: Key, filters: Record<number, boolean>) {
     await this.database.categoryFilters.set(key, filters);
+    this.cloudSync.schedulePush(key);
   }
 
   public async addNote(key: Key, note: Omit<MG.Note, "id" | "created_at">) {

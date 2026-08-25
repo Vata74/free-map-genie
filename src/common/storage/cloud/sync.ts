@@ -22,10 +22,18 @@ import type { UserData } from "../format";
 
 const PUSH_DEBOUNCE_MS = 3000;
 
+type CategoryFilters = Record<number, boolean>;
+
 // Syncs one Dexie-shaped UserData blob per (Firebase user, game) to
 // Firestore at users/{uid}/games/{gameId}. Dexie stays the source of truth
 // for local reads/writes; this only mirrors it to/from the cloud so it
 // survives the local browser storage being cleared or wiped.
+//
+// Category filters (which categories are shown/hidden) live in their own
+// Dexie store, separate from UserData, so they're threaded through here as
+// their own pair of callbacks rather than folded into UserData — UserData
+// is also the on-disk export/import file format and the v1/v2 legacy
+// migration shape, and neither of those know about category filters.
 export class CloudSync {
   private user: CloudUser | null = null;
   private readonly ready: Promise<void>;
@@ -34,7 +42,12 @@ export class CloudSync {
 
   public constructor(
     private readonly getLocalData: (key: Key) => Promise<UserData>,
-    private readonly setLocalData: (key: Key, data: UserData) => Promise<void>
+    private readonly setLocalData: (key: Key, data: UserData) => Promise<void>,
+    private readonly getLocalCategoryFilters: (key: Key) => Promise<CategoryFilters>,
+    private readonly setLocalCategoryFilters: (
+      key: Key,
+      filters: CategoryFilters
+    ) => Promise<void>
   ) {
     this.ready = waitForAuthReady().then((user) => {
       this.user = user;
@@ -135,10 +148,14 @@ export class CloudSync {
       const local = await this.getLocalData(key);
       if (!this.isEmpty(local)) return;
 
-      const { updatedAt, ...cloud } = snapshot.data() as UserData & {
+      const { updatedAt, categoryFilters, ...cloud } = snapshot.data() as UserData & {
         updatedAt?: unknown;
+        categoryFilters?: CategoryFilters;
       };
       await this.setLocalData(key, cloud);
+      if (categoryFilters) {
+        await this.setLocalCategoryFilters(key, categoryFilters);
+      }
     } catch (err) {
       logger.error("Failed to pull cloud data.", err);
     }
@@ -180,7 +197,10 @@ export class CloudSync {
     const ref = this.docRef(key);
     if (!ref) return;
 
-    const data = await this.getLocalData(key);
-    await setDoc(ref, { ...data, updatedAt: serverTimestamp() });
+    const [data, categoryFilters] = await Promise.all([
+      this.getLocalData(key),
+      this.getLocalCategoryFilters(key),
+    ]);
+    await setDoc(ref, { ...data, categoryFilters, updatedAt: serverTimestamp() });
   }
 }
